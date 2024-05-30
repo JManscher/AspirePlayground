@@ -1,0 +1,67 @@
+﻿@page "/create-customer"
+@using System.Text.Json
+@using AspirePlayground.Web.Frontend.Customer
+@using AspirePlayground.Web.Frontend.Customer.Models
+@inject CustomerApiClient CustomerApi
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Create Customer</h3>
+
+<EditForm Model="@Customer" OnSubmit="SubmitCustomer" FormName="CreateCustomerForm" data-enhance>
+    <div class="form-group">
+        <label for="Name">Name:</label>
+        <InputText id="Name" class="form-control" @bind-Value="Customer.Name" />
+    </div>
+
+    <div class="form-group">
+        <label for="Email">Email:</label>
+        <InputText id="Email" class="form-control" @bind-Value="Customer.Email" />
+    </div>
+
+    <div class="form-group">
+        <label for="PhoneNumber">Phone Number:</label>
+        <InputText id="PhoneNumber" class="form-control" @bind-Value="Customer.PhoneNumber" />
+    </div>
+
+    <div class="form-group">
+        <label for="Address">Address:</label>
+        <InputText id="Address" class="form-control" @bind-Value="Customer.Address" />
+    </div>
+
+    <div class="form-group">
+        <label for="Company">Company:</label>
+        <InputText id="Company" class="form-control" @bind-Value="Customer.Company" />
+    </div>
+
+    <div class="form-group">
+        <label for="Title">Title:</label>
+        <InputText id="Title" class="form-control" @bind-Value="Customer.Title" />
+    </div>
+
+    <button type="submit" class="btn btn-primary" disabled="@IsLoading">
+        @if (IsLoading)
+        {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        }
+        else
+        {
+            <span>Create</span>
+        }
+    </button>
+</EditForm>
+
+@code {
+    public CustomerWriteModel Customer = new();
+    private bool IsLoading = false;
+
+    private async Task SubmitCustomer()
+    {
+        Console.WriteLine($"Submitting customer: {JsonSerializer.Serialize(Customer)}");
+        IsLoading = true;
+        var id = await CustomerApi.CreateCustomer(Customer);
+        Thread.Sleep(1000);
+        IsLoading = false;
+        NavigationManager.NavigateTo($"/customer/{id}/details");
+    }
+}

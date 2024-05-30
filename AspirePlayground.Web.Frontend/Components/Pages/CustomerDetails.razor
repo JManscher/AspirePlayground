@@ -1,0 +1,93 @@
+﻿@page "/customer/{Id}/details"
+@using AspirePlayground.Web.Frontend.Customer
+@using AspirePlayground.Web.Frontend.Customer.Models
+@attribute [StreamRendering()]
+@attribute [OutputCache(Duration = 5)]
+@inject CustomerApiClient CustomerApi
+@rendermode InteractiveServer
+
+<div class="card">
+    <div class="card-header">
+        <h3>Customer Details</h3>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">Customer ID: @Id</h5>
+        <div class="form-group">
+            <label for="Name">Name:</label>
+            <input id="Name" class="form-control" @bind="_customerWriteModel.Name" />
+        </div>
+        <div class="form-group">
+            <label for="Email">Email:</label>
+            <input id="Email" class="form-control" @bind="_customerWriteModel.Email" />
+        </div>
+        <div class="form-group">
+            <label for="PhoneNumber">Phone Number:</label>
+            <input id="PhoneNumber" class="form-control" @bind="_customerWriteModel.PhoneNumber" />
+        </div>
+        <div class="form-group">
+            <label for="Address">Address:</label>
+            <input id="Address" class="form-control" @bind="_customerWriteModel.Address" />
+        </div>
+        <div class="form-group">
+            <label for="Company">Company:</label>
+            <input id="Company" class="form-control" @bind="_customerWriteModel.Company" />
+        </div>
+        <div class="form-group">
+            <label for="Title">Title:</label>
+            <input id="Title" class="form-control" @bind="_customerWriteModel.Title" />
+        </div>
+        <button class="btn btn-primary" @onclick="UpdateCustomer">
+            @if (IsLoading)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            }
+            else
+            {
+                <span>Update</span>
+            }
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Id { get; set; }
+
+    private Customer? _customer;
+    
+    private bool IsLoading = false;
+
+    private CustomerWriteModel _customerWriteModel = new CustomerWriteModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id == null)
+            throw new ArgumentNullException(nameof(Id));
+        IsLoading = true;
+        await LoadCustomer();
+        IsLoading = false;
+        
+    }
+
+    private async Task UpdateCustomer()
+    {
+        IsLoading = true;
+        await CustomerApi.UpdateCustomer(_customerWriteModel, Id);
+        Thread.Sleep(1000);
+        await LoadCustomer();
+        IsLoading = false;
+    }
+
+    private async Task LoadCustomer()
+    {
+        _customer = await CustomerApi.GetCustomerById(Guid.Parse(Id));
+        _customerWriteModel = new CustomerWriteModel
+        {
+            Name = _customer.Name,
+            Email = _customer.Email,
+            PhoneNumber = _customer.PhoneNumber,
+            Address = _customer.Address,
+            Company = _customer.Company,
+            Title = _customer.Title
+        };
+    }
+}

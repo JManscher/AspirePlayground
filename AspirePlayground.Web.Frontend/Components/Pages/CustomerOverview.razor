@@ -1,0 +1,38 @@
+﻿@page "/customer/{Id}/details"
+@using AspirePlayground.Web.Frontend.Customer
+@using AspirePlayground.Web.Frontend.Customer.Models
+@attribute [StreamRendering()]
+@attribute [OutputCache(Duration = 5)]
+@inject CustomerApiClient CustomerApi
+@rendermode InteractiveServer
+
+<div style="overflow-y: scroll; height: 300px;">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Customer ID</th>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var customer in customers)
+            {
+                <tr>
+                    <td><a href="/customer/@customer.Id/details">@customer.Id</a></td>
+                    <td>@customer.Name</td>
+                    <td>@customer.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    List<Customer> customers = new List<Customer>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        customers = await CustomerApi.GetCustomersAsync();
+    }
+}

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsAspireHost>true</IsAspireHost>
+        <RootNamespace>AspirePlayground.AppHost</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\AspirePlayground.CustomerService\AspirePlayground.CustomerService.csproj" />
+        <ProjectReference Include="..\AspirePlayground.EventFeed\AspirePlayground.EventFeed.csproj" />
+        <ProjectReference Include="..\AspirePlayground.Web.Backend\AspirePlayground.Web.Backend.csproj" />
+        <ProjectReference Include="..\AspirePlayground.Web.Frontend\AspirePlayground.Web.Frontend.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.AppHost" Version="8.0.1" />
+        <PackageReference Include="Aspire.Hosting.Azure.CosmosDB" Version="8.0.1" />
+        <PackageReference Include="Aspire.Hosting.Dapr" Version="8.0.1" />
+        <PackageReference Include="Aspire.Hosting.Redis" Version="8.0.1" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,6 @@
+@BFF_HostAddress = http://localhost:5003
+
+GET {{BFF_HostAddress}}/4c6b78c6-9960-484c-93ec-d785d2352cb9
+Accept: application/json
+
+###

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>AspirePlayground.EventFeed</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Microsoft.Azure.Cosmos" Version="8.0.1" />
+        <PackageReference Include="Dapr.AspNetCore" Version="1.13.1" />
+        <PackageReference Include="Dapr.Client" Version="1.13.1" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\AspirePlayground.IntegrationEvents\AspirePlayground.IntegrationEvents.csproj" />
+      <ProjectReference Include="..\AspirePlayground.ServiceDefaults\AspirePlayground.ServiceDefaults.csproj" />
+    </ItemGroup>
+</Project>
