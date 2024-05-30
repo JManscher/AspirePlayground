@@ -55,10 +55,16 @@ public class CustomerRepository: ICustomerRepository
         await container.CreateItemAsync(@event, new PartitionKey(@event.Id));
     }
 
-    public async Task<List<Customer>> GetCustomers()
+    public async IAsyncEnumerable<CustomerEvent> ReadAllEvents()
     {
         var container = await _lazyEventContainer.Value;
-
-        var query = new QueryDefinition("SELECT * FROM c WHERE c.EventType = 'Created' ORDER BY c.CreatedAtUtc DESC");
+        var iterator = container.GetChangeFeedIterator<CustomerEvent>(ChangeFeedStartFrom.Beginning(), ChangeFeedMode.LatestVersion);
+        while(iterator.HasMoreResults)
+        {
+            foreach(var item in await iterator.ReadNextAsync())
+            {
+                yield return item;
+            }
+        }
     }
 }

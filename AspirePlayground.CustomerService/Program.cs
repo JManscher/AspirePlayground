@@ -40,17 +40,12 @@ app.MapGet("/customer/{id:guid}", GetCustomerById)
     .WithName("GetCustomerById")
     .WithOpenApi();
 
-app.MapPost("/customer/events", ProcessCustomerEventsDelegate.ProcessCustomerEvents)
+app.MapPost("/customer/events", CustomerEventDelegates.ProcessCustomerEvents)
     .WithTopic("pubsub", "customer-events")
     .WithOpenApi();
 
-app.MapGet("/customer", GetCustomers)
-    .WithName("GetCustomers")
-    .WithOpenApi();
-
-app.MapPost("/customer/events/changed", UpdateCustomerView)
-    .WithName("UpdateCustomerView")
-    .WithTopic("pubsub", "customer-changed")
+app.MapPost("/customer/events/republish", RepublishCustomerEvents)
+    .WithName("RepublishCustomerEvents")
     .WithOpenApi();
 
 app.MapDefaultEndpoints();

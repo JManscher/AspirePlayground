@@ -18,7 +18,7 @@ public class CustomerEventWorker(ILogger<CustomerEventWorker> logger, DaprClient
 
         ChangeFeedProcessor changeFeedProcessor = container
             .GetChangeFeedProcessorBuilder<CustomerEvent>(processorName: nameof(CustomerEventWorker),
-                onChangesDelegate:  HandleChangesAsync)
+                onChangesDelegate: HandleChangesAsync)
             .WithInstanceName(nameof(AspirePlayground.EventFeed))
             .WithLeaseContainer(leaseContainer)
             .Build();
@@ -35,7 +35,7 @@ public class CustomerEventWorker(ILogger<CustomerEventWorker> logger, DaprClient
                 await changeFeedProcessor.StopAsync();
                 return;
             }
-            await Task.Delay(1000, stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
         }
     }
 

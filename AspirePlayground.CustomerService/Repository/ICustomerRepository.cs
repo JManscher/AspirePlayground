@@ -7,5 +7,6 @@ public interface ICustomerRepository
 {
     Task<Customer?> GetCustomerById(Guid id);
     Task AppendEvent(CustomerEvent @event);
-    Task<List<Customer>> GetCustomers();
+    IAsyncEnumerable<CustomerEvent> ReadAllEvents();
+
 }
