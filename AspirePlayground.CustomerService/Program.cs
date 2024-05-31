@@ -1,6 +1,7 @@
+using System.Threading.Channels;
 using AspirePlayground.CustomerService.Delegates;
+using AspirePlayground.CustomerService.Model;
 using AspirePlayground.CustomerService.Repository;
-using static AspirePlayground.CustomerService.Delegates.GetCustomerByIdDelegate;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +16,12 @@ builder.Services.AddProblemDetails();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDaprClient();
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+
+builder.Services.AddKeyedSingleton(Channel.CreateUnbounded<RepublishCustomerEvents>(), "customer-events");
+builder.Services.AddHostedService<RepublishCustomerFeed>();
 
 var app = builder.Build();
 
@@ -36,7 +41,7 @@ app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
-app.MapGet("/customer/{id:guid}", GetCustomerById)
+app.MapGet("/customer/{id:guid}", CustomerDelegates.GetCustomerById)
     .WithName("GetCustomerById")
     .WithOpenApi();
 
@@ -44,7 +49,7 @@ app.MapPost("/customer/events", CustomerEventDelegates.ProcessCustomerEvents)
     .WithTopic("pubsub", "customer-events")
     .WithOpenApi();
 
-app.MapPost("/customer/events/republish", RepublishCustomerEvents)
+app.MapPost("/customer/events/republish", CustomerDelegates.RepublishCustomerEvents)
     .WithName("RepublishCustomerEvents")
     .WithOpenApi();
 

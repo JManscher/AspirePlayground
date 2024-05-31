@@ -9,8 +9,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\AspirePlayground.IntegrationEvents\AspirePlayground.IntegrationEvents.csproj" />
-        <ProjectReference Include="..\AspirePlayground.ServiceDefaults\AspirePlayground.ServiceDefaults.csproj" />
+        <ProjectReference
+            Include="..\AspirePlayground.IntegrationEvents\AspirePlayground.IntegrationEvents.csproj" />
+        <ProjectReference
+            Include="..\AspirePlayground.ServiceDefaults\AspirePlayground.ServiceDefaults.csproj" />
+        <PackageReference Include="Aspire.Microsoft.Azure.Cosmos" Version="8.0.1" />
         <PackageReference Include="Dapr.AspNetCore" Version="1.13.1" />
         <PackageReference Include="Dapr.Client" Version="1.13.1" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.5" />

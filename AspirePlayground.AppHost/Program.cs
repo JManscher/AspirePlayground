@@ -5,6 +5,10 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+var cosmos = builder.AddAzureCosmosDB("cosmosConnectionName");
+
+cosmos.RunAsEmulator();
+
 builder.AddDapr((options) =>
 {
     options.EnableTelemetry = true;
@@ -14,9 +18,11 @@ builder.AddProject<AspirePlayground_Web_Frontend>("webfrontend")
     .WithDaprSidecar("web");
 
 builder.AddProject<AspirePlayground_Web_Backend>("webbackend")
+    .WithReference(cosmos)
     .WithDaprSidecar("bff");
 
 builder.AddProject<AspirePlayground_CustomerService>("customerservice")
+    .WithReference(cosmos)
     .WithDaprSidecar("customerservice");
 
 builder.AddProject<AspirePlayground_EventFeed>("eventfeed")

@@ -35,9 +35,15 @@ public static class Customers
         return TypedResults.Ok();
     }
 
-    public async static Task<Ok<List<Customer>>> GetCustomers([FromServices] ICustomerService customerService)
+    public static Ok<IAsyncEnumerable<Customer>> GetCustomers([FromServices] ICustomerService customerService)
     {
-        return TypedResults.Ok(await customerService.GetCustomers());
+        return TypedResults.Ok(customerService.GetCustomers());
+    }
+
+    public static async Task ProcessCustomerEvents([FromServices] ILogger<ICustomerService> logger, [FromBody] CustomerEvent customerEvent)
+    {
+        logger.LogInformation("Processing customer event {@customerEvent}", customerEvent);
+        await Task.CompletedTask;
     }
 
 }
