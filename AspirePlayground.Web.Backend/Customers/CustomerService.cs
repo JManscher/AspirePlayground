@@ -1,8 +1,10 @@
 ﻿using System.Net;
+using System.Text.Json;
 using AspirePlayground.IntegrationEvents.CustomerEvents;
 using AspirePlayground.Web.Backend.Customers.Models;
 using Dapr.Client;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Core;
 
 namespace AspirePlayground.Web.Backend.Customers;
 
@@ -12,7 +14,7 @@ public class CustomerService(DaprClient daprClient, CosmosClient cosmosClient, I
     {
 
         var db = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
-        var container = await db.Database.CreateContainerIfNotExistsAsync(containerName, "/CustomerId");
+        var container = await db.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
         return container;
     });
 
@@ -38,7 +40,7 @@ public class CustomerService(DaprClient daprClient, CosmosClient cosmosClient, I
         await daprClient.PublishEventAsync("pubsub", "customer-events", new CustomerEvent()
         {
             EventType = CustomerEventTypeEnum.Created,
-            Id = guid.ToString(),
+            CustomerId = guid.ToString(),
             Name = customerWriteModel.Name,
             Email = customerWriteModel.Email,
             PhoneNumber = customerWriteModel.PhoneNumber,
@@ -56,7 +58,7 @@ public class CustomerService(DaprClient daprClient, CosmosClient cosmosClient, I
         return daprClient.PublishEventAsync("pubsub", "customer-events", new CustomerEvent()
         {
             EventType = CustomerEventTypeEnum.Updated,
-            Id = id.ToString(),
+            CustomerId = id.ToString(),
             Name = customerWriteModel.Name,
             Email = customerWriteModel.Email,
             PhoneNumber = customerWriteModel.PhoneNumber,
@@ -86,15 +88,30 @@ public class CustomerService(DaprClient daprClient, CosmosClient cosmosClient, I
         }
     }
 
-    public async Task StoreCachedCustomer(CustomerEvent customer)
+    public async Task StoreCachedCustomer(CustomerChangedEvent customerChangedEvent)
     {
         var container = await _container.Value;
-        var existing = await container.ReadItemAsync<CustomerEvent>(customer.Id.ToString(), new PartitionKey(customer.Id.ToString()));
-        if (existing.Resource.Sk > customer.CreatedAtUtc.Ticks)
+        var response = await container.ReadItemStreamAsync(customerChangedEvent.CustomerId, new PartitionKey(customerChangedEvent.CustomerId));
+        if(response.StatusCode == HttpStatusCode.OK)
         {
-            logger.LogInformation("New customer event {existingStreamId} already stored, ignoring {newCustomerStreamId}", existing.Resource.StreamId, customer.StreamId);
-            return;
+            var existing = await JsonSerializer.DeserializeAsync<Customer>(response.Content);
+            if(existing?.ModifiedDateUtc > customerChangedEvent.CreatedAtUtc)
+            {
+                logger.LogInformation("New customer event {existingStreamId} already stored, ignoring {newCustomerStreamId}", existing.Id, customerChangedEvent.CustomerId);
+                return;
+            }
         }
-        await container.UpsertItemAsync(customer);
+        var customer = new Customer(
+            Guid.Parse(customerChangedEvent.CustomerId),
+            customerChangedEvent.Name,
+            customerChangedEvent.Email,
+            customerChangedEvent.PhoneNumber,
+            customerChangedEvent.Address,
+            customerChangedEvent.Company,
+            customerChangedEvent.Title,
+            customerChangedEvent.CreatedAtUtc
+        );
+        logger.LogInformation("Storing customer {@customer}", JsonSerializer.Serialize(customer));
+        await container.UpsertItemAsync(customer, new PartitionKey(customer.Id.ToString()));
     }
 }

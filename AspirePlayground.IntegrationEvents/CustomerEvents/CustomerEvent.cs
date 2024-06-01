@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
+// Have to use Newtonsoft.Json because Cosmos SDK does not support System.Text.Json
 
 namespace AspirePlayground.IntegrationEvents.CustomerEvents;
 
@@ -14,15 +15,14 @@ public class CustomerEvent
     public required string Company { get; init; }
     public required string Title { get; init; }
     
-    [JsonPropertyName("CustomerId")]
-    public required string Id { get; init; }
+    public required string CustomerId { get; init; }
     
     public DateTime CreatedAtUtc { get; set; }
 
     public long Sk => CreatedAtUtc.Ticks;
     
-    [JsonPropertyName("id")]
-    public string StreamId => $"{Id}_{Sk}";
+    [JsonProperty("id")]
+    public string StreamId => $"{CustomerId}_{Sk}";
 }
 
 public enum CustomerEventTypeEnum

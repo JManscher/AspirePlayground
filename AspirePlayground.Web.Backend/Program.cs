@@ -1,4 +1,3 @@
-using AspirePlayground.IntegrationEvents.CustomerEvents;
 using AspirePlayground.Web.Backend.Customers;
 using Dapr.Client;
 using static AspirePlayground.Web.Backend.Customers.Delegates.Customers;
@@ -31,6 +30,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.AddDaprSubscriber();
 
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();
@@ -65,6 +66,6 @@ await Task.Delay(TimeSpan.FromSeconds(30));
 
 var daprClient = app.Services.GetRequiredService<DaprClient>();
 // For test purposes we will request a resync of all customers
-await daprClient.InvokeMethodAsync("customerservice", "customer/events/republish", new { RequestId = Guid.NewGuid() });
+await daprClient.PublishEventAsync("pubsub", "customer-republish", new { RequestId = Guid.NewGuid() });
 
 await runTask;

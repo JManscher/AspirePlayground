@@ -10,4 +10,6 @@ public record CustomerChangedEvent
     public required string Company { get; init; }
     public required string Title { get; init; }
     public required string CustomerId { get; init; }
+    public required DateTime CreatedAtUtc { get; set; }
+
 }

@@ -40,10 +40,11 @@ public static class Customers
         return TypedResults.Ok(customerService.GetCustomers());
     }
 
-    public static async Task ProcessCustomerEvents([FromServices] ILogger<ICustomerService> logger, [FromBody] CustomerEvent customerEvent)
+    public static async Task ProcessCustomerEvents([FromServices] ICustomerService customerService, [FromServices] ILogger<ICustomerService> logger, [FromBody] CustomerChangedEvent customerEvent)
     {
         logger.LogInformation("Processing customer event {@customerEvent}", customerEvent);
-        await Task.CompletedTask;
+        await customerService.StoreCachedCustomer(customerEvent);
+        
     }
 
 }

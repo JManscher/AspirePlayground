@@ -100,4 +100,17 @@ public static class Extensions
 
         return app;
     }
+
+    public static WebApplication AddDaprSubscriber(this WebApplication app){
+        
+        app.UseCloudEvents();
+        app.UseRouting();
+        
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapSubscribeHandler();
+        });
+
+        return app;
+    }
 }

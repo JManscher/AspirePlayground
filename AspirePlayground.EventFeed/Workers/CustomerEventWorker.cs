@@ -52,7 +52,7 @@ public class CustomerEventWorker(ILogger<CustomerEventWorker> logger, DaprClient
         
         foreach (CustomerEvent item in changes)
         {
-            logger.LogDebug("Detected operation for item with id {id}, created at {creationTime}.", item.Id, item.CreatedAtUtc);
+            logger.LogDebug("Detected operation for item with id {id}, created at {creationTime}.", item.CustomerId, item.CreatedAtUtc);
         }
         
         var customerChangedEvents = changes.Select(c => new CustomerChangedEvent
@@ -64,7 +64,8 @@ public class CustomerEventWorker(ILogger<CustomerEventWorker> logger, DaprClient
             PhoneNumber = c.PhoneNumber,
             Title = c.Title,
             EventType = c.EventType,
-            CustomerId = c.Id
+            CustomerId = c.CustomerId,
+            CreatedAtUtc = c.CreatedAtUtc
         }).ToImmutableList();
 
         var result = await daprClient.BulkPublishEventAsync<CustomerChangedEvent>(

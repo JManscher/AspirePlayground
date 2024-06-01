@@ -36,7 +36,18 @@ public class RepublishCustomerFeed : BackgroundService
             };
             await foreach (var @event in ReadAllEvents(stoppingToken))
             {
-                await _daprClient.PublishEventAsync("pubsub", "customer-changed", @event, metaData, stoppingToken);
+                await _daprClient.PublishEventAsync("pubsub", "customer-changed", new CustomerChangedEvent{
+                    Address = @event.Address,
+                    Company = @event.Company,
+                    CreatedAtUtc = @event.CreatedAtUtc,
+                    CustomerId = @event.CustomerId,
+                    Email = @event.Email,
+                    EventType = @event.EventType,
+                    Name = @event.Name,
+                    PhoneNumber = @event.PhoneNumber,
+                    Title = @event.Title
+                
+                }, metaData, stoppingToken);
             }
             _logger.LogInformation("Customer events were republished");
 

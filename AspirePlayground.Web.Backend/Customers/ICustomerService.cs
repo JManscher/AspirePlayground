@@ -9,5 +9,5 @@ public interface ICustomerService
     Task<Guid> CreateCustomer(CustomerWriteModel customerWriteModel);
     Task UpdateCustomer(CustomerWriteModel customerWriteModel, Guid id);
     IAsyncEnumerable<Customer> GetCustomers();
-    Task StoreCachedCustomer(CustomerEvent customer);
+    Task StoreCachedCustomer(CustomerChangedEvent customer);
 }

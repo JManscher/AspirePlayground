@@ -23,7 +23,7 @@ builder.AddProject<AspirePlayground_Web_Backend>("webbackend")
     // .WithReference(cosmos)
     .WithDaprSidecar("bff");
 
-builder.AddProject<AspirePlayground_CustomerService>("customerservice")
+builder.AddProject<AspirePlayground_CustomerService>("customer-service")
     // .WithReference(cosmos)
     .WithDaprSidecar("customerservice");
 

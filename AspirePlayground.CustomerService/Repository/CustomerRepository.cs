@@ -57,6 +57,6 @@ public class CustomerRepository: ICustomerRepository
     public async Task AppendEvent(CustomerEvent @event) 
     {
         var container = await _lazyEventContainer.Value;
-        await container.CreateItemAsync(@event, new PartitionKey(@event.Id));
+        await container.CreateItemAsync(@event, new PartitionKey(@event.CustomerId));
     }
 }

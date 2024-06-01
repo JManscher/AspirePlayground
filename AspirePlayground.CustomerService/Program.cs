@@ -26,9 +26,7 @@ builder.Services.AddHostedService<RepublishCustomerFeed>();
 
 var app = builder.Build();
 
-app.UseCloudEvents();
-app.UseRouting();
-app.MapSubscribeHandler();
+app.AddDaprSubscriber();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -50,7 +48,8 @@ app.MapPost("/customer/events", CustomerEventDelegates.ProcessCustomerEvents)
     .WithTopic("pubsub", "customer-events")
     .WithOpenApi();
 
-app.MapPost("/customer/events/republish", CustomerDelegates.RepublishCustomerEvents)
+app.MapPost("/customer/republish", CustomerDelegates.RepublishCustomerEvents)
+    .WithTopic("pubsub", "customer-republish")
     .WithName("RepublishCustomerEvents")
     .WithOpenApi();
 

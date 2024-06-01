@@ -1,4 +1,4 @@
-﻿@page "/customer/{Id}/details"
+﻿@page "/customer/{CustomerId}/details"
 @using AspirePlayground.Web.Frontend.Customer
 @using AspirePlayground.Web.Frontend.Customer.Models
 @attribute [StreamRendering()]
@@ -12,7 +12,7 @@
         <h3>Customer Details</h3>
     </div>
     <div class="card-body">
-        <h5 class="card-title">Customer ID: @Id</h5>
+        <h5 class="card-title">Customer ID: @CustomerId</h5>
         <div class="form-group">
             <label for="Name">Name:</label>
             <input id="Name" class="form-control" @bind="_customerWriteModel.Name" />
@@ -51,7 +51,7 @@
 </div>
 
 @code {
-    [Parameter] public string? Id { get; set; }
+    [Parameter] public string? CustomerId { get; set; }
 
     private Customer? _customer;
     
@@ -61,8 +61,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (Id == null)
-            throw new ArgumentNullException(nameof(Id));
+        if (CustomerId == null)
+            throw new ArgumentNullException(nameof(CustomerId));
+            
         IsLoading = true;
         await LoadCustomer();
         IsLoading = false;
@@ -72,7 +73,7 @@
     private async Task UpdateCustomer()
     {
         IsLoading = true;
-        await CustomerApi.UpdateCustomer(_customerWriteModel, Id);
+        await CustomerApi.UpdateCustomer(_customerWriteModel, CustomerId);
         Thread.Sleep(1000);
         await LoadCustomer();
         IsLoading = false;
@@ -80,7 +81,7 @@
 
     private async Task LoadCustomer()
     {
-        _customer = await CustomerApi.GetCustomerById(Guid.Parse(Id));
+        _customer = await CustomerApi.GetCustomerById(Guid.Parse(CustomerId!));
         if(_customer == null)
             NavigationManager.NavigateTo("/Error");
         
