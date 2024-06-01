@@ -1,13 +1,21 @@
-﻿using AspirePlayground.Web.Frontend.Customer.Models;
+﻿using System.Net;
+using AspirePlayground.Web.Frontend.Customer.Models;
 using Dapr.Client;
 
 namespace AspirePlayground.Web.Frontend.Customer;
 
 public class CustomerApiClient(DaprClient daprClient)
 {
-    public Task<Models.Customer> GetCustomerById(Guid id)
+    public async Task<Models.Customer?> GetCustomerById(Guid id)
     {
-        return daprClient.InvokeMethodAsync<Models.Customer>(HttpMethod.Get, "bff", $"customer/{id}");
+        var response = await daprClient.InvokeMethodWithResponseAsync(daprClient.CreateInvokeMethodRequest(HttpMethod.Get, "bff", $"customer/{id}"));
+        if (response.StatusCode == HttpStatusCode.NotFound || response.StatusCode == HttpStatusCode.NoContent)
+        {
+            return null;
+        }
+
+        var customer = await response.Content.ReadFromJsonAsync<Models.Customer>();
+        return customer;
     }
     
     public Task<Guid> CreateCustomer(CustomerWriteModel customer)

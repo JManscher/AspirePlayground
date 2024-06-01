@@ -33,12 +33,17 @@ public class CustomerRepository: ICustomerRepository
             .WithParameter("@id", id);
         
         var iterator = container.GetItemQueryIterator<CustomerEvent>(query);
-        
+
         var customer = new Customer();
 
         while(iterator.HasMoreResults)
         {
             var results = await iterator.ReadNextAsync();
+
+            if(results.Count == 0)
+            {
+                return null;
+            }
             
             foreach(var result in results)
             {
@@ -53,18 +58,5 @@ public class CustomerRepository: ICustomerRepository
     {
         var container = await _lazyEventContainer.Value;
         await container.CreateItemAsync(@event, new PartitionKey(@event.Id));
-    }
-
-    public async IAsyncEnumerable<CustomerEvent> ReadAllEvents()
-    {
-        var container = await _lazyEventContainer.Value;
-        var iterator = container.GetChangeFeedIterator<CustomerEvent>(ChangeFeedStartFrom.Beginning(), ChangeFeedMode.LatestVersion);
-        while(iterator.HasMoreResults)
-        {
-            foreach(var item in await iterator.ReadNextAsync())
-            {
-                yield return item;
-            }
-        }
     }
 }

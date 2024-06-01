@@ -59,8 +59,12 @@ app.MapPost("/customer/events", ProcessCustomerEvents)
 
 app.MapDefaultEndpoints();
 
+var runTask = app.RunAsync();
+
+await Task.Delay(TimeSpan.FromSeconds(30));
+
 var daprClient = app.Services.GetRequiredService<DaprClient>();
 // For test purposes we will request a resync of all customers
 await daprClient.InvokeMethodAsync("customerservice", "customer/events/republish", new { RequestId = Guid.NewGuid() });
 
-app.Run();
+await runTask;

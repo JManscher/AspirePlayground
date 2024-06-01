@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace AspirePlayground.IntegrationEvents.CustomerEvents;
 
@@ -14,14 +14,14 @@ public class CustomerEvent
     public required string Company { get; init; }
     public required string Title { get; init; }
     
-    [JsonProperty("CustomerId")]
+    [JsonPropertyName("CustomerId")]
     public required string Id { get; init; }
     
     public DateTime CreatedAtUtc { get; set; }
 
     public long Sk => CreatedAtUtc.Ticks;
     
-    [JsonProperty("id")]
+    [JsonPropertyName("id")]
     public string StreamId => $"{Id}_{Sk}";
 }
 

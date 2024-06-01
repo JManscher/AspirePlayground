@@ -1,20 +1,27 @@
+using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using AspirePlayground.CustomerService.Model;
-using AspirePlayground.CustomerService.Repository;
+using AspirePlayground.IntegrationEvents.CustomerEvents;
 using Dapr.Client;
+using Microsoft.Azure.Cosmos;
 public class RepublishCustomerFeed : BackgroundService
 {
     private readonly Channel<RepublishCustomerEvents> _queue;
     private readonly ILogger<RepublishCustomerFeed> _logger;
-    private readonly ICustomerRepository _customerRepository;
     private readonly DaprClient _daprClient;
 
-    public RepublishCustomerFeed(IServiceProvider serviceProvider, ILogger<RepublishCustomerFeed> logger, ICustomerRepository customerRepository, DaprClient daprClient)
+    private readonly Lazy<Task<Container>> _lazyEventContainer;
+    public RepublishCustomerFeed(Channel<RepublishCustomerEvents> channel, ILogger<RepublishCustomerFeed> logger, CosmosClient cosmosClient, DaprClient daprClient)
     {
-        _queue = serviceProvider.GetKeyedService<Channel<RepublishCustomerEvents>>("customer-events") ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _queue = channel;
         _logger = logger;
-        _customerRepository = customerRepository;
         _daprClient = daprClient;
+        _lazyEventContainer = new Lazy<Task<Container>>(async () =>
+        {
+            var db = await cosmosClient.CreateDatabaseIfNotExistsAsync("AspirePlayground");
+            var container = await db.Database.CreateContainerIfNotExistsAsync("CustomerEvents", "/CustomerId");
+            return container.Container;
+        });
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -27,12 +34,27 @@ public class RepublishCustomerFeed : BackgroundService
                 { "republished", DateTimeOffset.UtcNow.ToString("O") },
                 { "republishId",  item.RequestId.ToString()}
             };
-            await foreach (var @event in _customerRepository.ReadAllEvents())
+            await foreach (var @event in ReadAllEvents(stoppingToken))
             {
-                await _daprClient.PublishEventAsync("pubsub", "customer-changed", @event, metaData);
+                await _daprClient.PublishEventAsync("pubsub", "customer-changed", @event, metaData, stoppingToken);
             }
             _logger.LogInformation("Customer events were republished");
 
+        }
+    }
+
+    private async IAsyncEnumerable<CustomerEvent> ReadAllEvents([EnumeratorCancellation] CancellationToken stoppingToken)
+    {
+        var container = await _lazyEventContainer.Value;
+        var query = new QueryDefinition("SELECT * FROM c ORDER BY c.Sk ASC");
+        var iterator = container.GetItemQueryIterator<CustomerEvent>(query);
+        while(iterator.HasMoreResults)
+        {
+            var results = await iterator.ReadNextAsync(stoppingToken);
+            foreach(var result in results)
+            {
+                yield return result;
+            }
         }
     }
 }

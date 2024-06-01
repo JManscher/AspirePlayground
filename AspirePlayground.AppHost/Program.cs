@@ -5,9 +5,11 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var cosmos = builder.AddAzureCosmosDB("cosmosConnectionName");
 
-cosmos.RunAsEmulator();
+// Disabled this part, as the emulator suffers from SSL issues
+// var cosmos = builder.AddAzureCosmosDB("cosmosConnectionName");
+
+// cosmos.RunAsEmulator();
 
 builder.AddDapr((options) =>
 {
@@ -18,14 +20,15 @@ builder.AddProject<AspirePlayground_Web_Frontend>("webfrontend")
     .WithDaprSidecar("web");
 
 builder.AddProject<AspirePlayground_Web_Backend>("webbackend")
-    .WithReference(cosmos)
+    // .WithReference(cosmos)
     .WithDaprSidecar("bff");
 
 builder.AddProject<AspirePlayground_CustomerService>("customerservice")
-    .WithReference(cosmos)
+    // .WithReference(cosmos)
     .WithDaprSidecar("customerservice");
 
 builder.AddProject<AspirePlayground_EventFeed>("eventfeed")
+    // .WithReference(cosmos)
     .WithDaprSidecar("eventfeed");
 
 // Workaround for https://github.com/dotnet/aspire/issues/2219

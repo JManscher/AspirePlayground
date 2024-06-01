@@ -23,7 +23,7 @@ public static class CustomerDelegates
     }
 
     public static Results<Ok, StatusCodeHttpResult> RepublishCustomerEvents(
-        [FromKeyedServices("customer-events")] Channel<RepublishCustomerEvents> queue,
+        [FromServices] Channel<RepublishCustomerEvents> queue,
         [FromServices] ILogger<RepublishCustomerFeed> logger,
         [FromBody] RepublishRequest request)
     {

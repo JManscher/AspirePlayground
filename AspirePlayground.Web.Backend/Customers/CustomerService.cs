@@ -1,4 +1,5 @@
-﻿using AspirePlayground.IntegrationEvents.CustomerEvents;
+﻿using System.Net;
+using AspirePlayground.IntegrationEvents.CustomerEvents;
 using AspirePlayground.Web.Backend.Customers.Models;
 using Dapr.Client;
 using Microsoft.Azure.Cosmos;
@@ -18,9 +19,17 @@ public class CustomerService(DaprClient daprClient, CosmosClient cosmosClient, I
     private readonly static string containerName = "customers";
     private readonly static string databaseName = "bff-db";
 
-    public Task<Customer?> GetCustomerById(Guid id)
+    public async Task<Customer?> GetCustomerById(Guid id)
     {
-        return daprClient.InvokeMethodAsync<Customer?>(HttpMethod.Get, "customerservice", $"customer/{id}");
+        var response = await  daprClient.InvokeMethodWithResponseAsync(daprClient.CreateInvokeMethodRequest(HttpMethod.Get, "customerservice", $"customer/{id}"));
+        if (response.StatusCode == HttpStatusCode.NotFound || response.StatusCode == HttpStatusCode.NoContent)
+        {
+            return null;
+        }
+
+        var customer = await response.Content.ReadFromJsonAsync<Customer>();
+        return customer;
+        
     }
 
     public async Task<Guid> CreateCustomer(CustomerWriteModel customerWriteModel)

@@ -20,7 +20,8 @@ builder.Services.AddDaprClient();
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
-builder.Services.AddKeyedSingleton(Channel.CreateUnbounded<RepublishCustomerEvents>(), "customer-events");
+var channel = Channel.CreateUnbounded<RepublishCustomerEvents>();
+builder.Services.AddSingleton<Channel<RepublishCustomerEvents>>(channel);
 builder.Services.AddHostedService<RepublishCustomerFeed>();
 
 var app = builder.Build();

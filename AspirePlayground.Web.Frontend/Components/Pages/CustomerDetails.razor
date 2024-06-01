@@ -4,6 +4,7 @@
 @attribute [StreamRendering()]
 @attribute [OutputCache(Duration = 5)]
 @inject CustomerApiClient CustomerApi
+@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
 <div class="card">
@@ -80,9 +81,12 @@
     private async Task LoadCustomer()
     {
         _customer = await CustomerApi.GetCustomerById(Guid.Parse(Id));
+        if(_customer == null)
+            NavigationManager.NavigateTo("/Error");
+        
         _customerWriteModel = new CustomerWriteModel
         {
-            Name = _customer.Name,
+            Name = _customer!.Name,
             Email = _customer.Email,
             PhoneNumber = _customer.PhoneNumber,
             Address = _customer.Address,
